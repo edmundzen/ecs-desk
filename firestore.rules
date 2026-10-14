@@ -1,0 +1,20 @@
+rules_version = '2';
+
+// The dashboard never talks to Firestore directly: the Cloud Run service does,
+// using the Admin SDK, which bypasses these rules entirely. So locking clients
+// out costs nothing today, and is already the right rule for the day sign-in
+// is added and the browser starts reading its own queue.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // An owner may only ever touch their own queue.
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Default deny. Anything not matched above is refused.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

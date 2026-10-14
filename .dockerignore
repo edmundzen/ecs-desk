@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+**/__pycache__/
+**/.adk/
+.git/
+.env
+**/.env
+tests/
+docs/
+ecs_desk/outbox.json
+*.md
