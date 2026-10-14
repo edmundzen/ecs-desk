@@ -886,6 +886,26 @@ pre {
   .brand-wrapper { flex-direction: column; align-items: flex-start; }
   .header-badges { width: 100%; justify-content: flex-start; }
 }
+
+/* Touch targets. A finger needs ~44px; the desktop sizes land at 28-38px,
+   so phones and any coarse pointer (tablets, touch laptops) get taller
+   controls. The tab row wraps because four 44px pills do not fit at 375px. */
+@media (max-width: 640px), (pointer: coarse) {
+  button { min-height: 44px; }
+  /* Four 44px pills in a row would stack one per line and push the input
+     off screen, so they pair up and the labels wrap instead. */
+  .preset-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .preset-btn {
+    min-height: 44px;
+    padding: 6px 10px;
+    font-size: 13px;
+    white-space: normal;
+    line-height: 1.25;
+    text-align: center;
+  }
+  .tab { min-height: 44px; padding: 0 16px; }
+  .tabs { flex-wrap: wrap; gap: 8px; }
+}
 </style>
 </head>
 <body>
@@ -912,7 +932,7 @@ pre {
         <span class="safe-pulse"></span>
         <span>Human in Control · No Auto-Send</span>
       </div>
-      <span class="tech-tag">Gemini 3.6 Flash · ADK</span>
+      <span class="tech-tag" id="techTag">Gemini · ADK</span>
     </div>
   </header>
 
@@ -980,7 +1000,7 @@ pre {
           </div>
         </div>
 
-        <textarea id="msg" rows="4" placeholder="Paste an email header, customer chat message, or invoice details..."></textarea>
+        <textarea id="msg" rows="4" aria-label="Incoming message to process" placeholder="Paste an email header, customer chat message, or invoice details..."></textarea>
         
         <div class="row">
           <button class="ghost" id="pick" type="button">
@@ -1018,22 +1038,22 @@ pre {
           </div>
         </div>
 
-        <div class="err" id="err"></div>
+        <div class="err" id="err" role="alert"></div>
       </div>
 
       <!-- Queue Filtering & Tab Controls -->
       <div class="filter-row">
-        <div class="tabs" role="tablist">
-          <button class="tab on" data-f="waiting_for_approval">
+        <div class="tabs" role="group" aria-label="Filter the approval queue">
+          <button class="tab on" data-f="waiting_for_approval" aria-pressed="true">
             Waiting <span class="tab-count" id="cWait">0</span>
           </button>
-          <button class="tab" data-f="approved">
+          <button class="tab" data-f="approved" aria-pressed="false">
             Approved <span class="tab-count" id="cAppr">0</span>
           </button>
-          <button class="tab" data-f="rejected">
+          <button class="tab" data-f="rejected" aria-pressed="false">
             Rejected <span class="tab-count" id="cRej">0</span>
           </button>
-          <button class="tab" data-f="all">
+          <button class="tab" data-f="all" aria-pressed="false">
             All <span class="tab-count" id="cAll">0</span>
           </button>
         </div>
@@ -1075,13 +1095,13 @@ pre {
   </footer>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let items = [], filter = 'waiting_for_approval', selected = null, img = null;
-const MIN_SAVED = 6; // rough estimate minutes saved per item handled
+const MIN_SAVED = 6; // rough estimate minutes saved per approved item
 
 // Demo presets for judges
 const PRESETS = {
@@ -1120,7 +1140,7 @@ async function refresh(keep) {
   $('#sWait').textContent = w.length;
   $('#sHigh').textContent = w.filter(i => i.urgency === 'high').length;
   $('#sAppr').textContent = a.length;
-  $('#sMins').textContent = items.length * MIN_SAVED;
+  $('#sMins').textContent = a.length * MIN_SAVED;
 
   $('#cWait').textContent = w.length;
   $('#cAppr').textContent = a.length;
@@ -1139,10 +1159,13 @@ function getLangBadge(i) {
     const m = i.intake.match(/LANGUAGE:\s*([^\r\n]+)/i);
     if (m) l = m[1].toLowerCase().trim();
   }
-  if (l.includes('chinese') || l.includes('zh') || l.includes('mandarin')) return '<span class="badge lang-zh">ZH</span>';
-  if (l.includes('tamil') || l.includes('ta')) return '<span class="badge lang-ta">TA</span>';
-  if (l.includes('malay') || l.includes('ms')) return '<span class="badge lang-ms">MS</span>';
-  if (l.includes('singlish')) return '<span class="badge lang-sg">SG</span>';
+  // Whole words only. Substring matching badged Tagalog and Catalan as Tamil.
+  const words = l.split(/[^a-z一-鿿]+/).filter(Boolean);
+  const has = (...names) => names.some(x => words.includes(x));
+  if (has('chinese', 'mandarin', 'zh', '中文')) return '<span class="badge lang-zh">ZH</span>';
+  if (has('tamil', 'ta')) return '<span class="badge lang-ta">TA</span>';
+  if (has('malay', 'melayu', 'bahasa', 'ms')) return '<span class="badge lang-ms">MS</span>';
+  if (has('singlish', 'sg')) return '<span class="badge lang-sg">SG</span>';
   return '<span class="badge lang-en">EN</span>';
 }
 
@@ -1218,6 +1241,7 @@ function showDetail(i) {
         <span>👤 <strong>${esc(i.customer || 'Unknown')}</strong></span>
         <span>🔖 Draft #${i.id}</span>
         <span>⏱️ Created ${esc(i.created || '')}</span>
+        ${i.model ? `<span>🤖 ${esc(i.model)}</span>` : ''}
         ${i.decided ? `<span>✓ Decided ${esc(i.decided)}</span>` : ''}
       </div>
     </div>
@@ -1258,6 +1282,8 @@ function showDetail(i) {
         </button>`}
     </div>
 
+    <div class="err" id="detailErr" role="alert"></div>
+
     <p class="disclaimer-note">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--teal)"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
       Human in Control: Approving marks the item ready. Nothing is dispatched until the business owner confirms.
@@ -1278,7 +1304,7 @@ function showDetail(i) {
         ${i.had_image ? `
           <div class="inspect-card">
             <span class="inspect-tag">Image Payload</span>
-            <pre>Image invoice or document was attached and analyzed by Gemini 3.6 Flash</pre>
+            <pre>Image invoice or document was attached and analyzed by ${esc(i.model || 'the Gemini intake agent')}</pre>
           </div>` : ''}
         <div class="inspect-card">
           <span class="inspect-tag">Agent 1: Intake Extracted Facts</span>
@@ -1295,11 +1321,24 @@ function showDetail(i) {
   updateCharCount();
 
   const send = async (status) => {
-    await fetch(`/api/items/${i.id}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status, draft_reply: $('#draft').value })
-    });
+    const errBox = $('#detailErr');
+    errBox.style.display = 'none';
+    let res = null;
+    try {
+      res = await fetch(`/api/items/${i.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, draft_reply: $('#draft').value })
+      });
+    } catch (e) {
+      console.error('Save failed', e);
+    }
+    // The draft is still in the textarea, so the buttons above are the retry.
+    if (!res || !res.ok) {
+      errBox.textContent = 'Could not save to the server. Your edits are still here — click again to retry.';
+      errBox.style.display = 'block';
+      return;
+    }
     toast(status === 'approved' ? 'Draft Approved ✓' : status === 'rejected' ? 'Draft Rejected ✕' : 'Edits Saved');
     await refresh(true);
   };
@@ -1326,8 +1365,12 @@ function showDetail(i) {
 
 // Tabs click handler
 document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
-  document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(x => {
+    x.classList.remove('on');
+    x.setAttribute('aria-pressed', 'false');
+  });
   t.classList.add('on');
+  t.setAttribute('aria-pressed', 'true');
   filter = t.dataset.f;
   renderList();
 });
@@ -1404,8 +1447,14 @@ $('#go').onclick = async () => {
       })
     });
     
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Something went wrong');
+    // A crash inside FastAPI answers with plain "Internal Server Error", so
+    // parse defensively or the JSON error replaces the real one.
+    const body = await res.text();
+    let data = {};
+    try { data = JSON.parse(body); } catch (parseError) { /* not JSON */ }
+    if (!res.ok) {
+      throw new Error(data.detail || `Server error ${res.status}. Check the server log for the traceback.`);
+    }
 
     document.querySelectorAll('.step').forEach(s => s.className = 'step done');
     clearInterval(timer);
@@ -1415,8 +1464,14 @@ $('#go').onclick = async () => {
     selected = data.id;
     filter = 'waiting_for_approval';
     
-    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x.dataset.f === filter));
+    document.querySelectorAll('.tab').forEach(x => {
+      const on = x.dataset.f === filter;
+      x.classList.toggle('on', on);
+      x.setAttribute('aria-pressed', String(on));
+    });
     await refresh(true);
+    // Say which model actually answered, not which one we hoped would.
+    if (data.model) $('#techTag').textContent = `${data.model} · ADK`;
     toast(`Draft #${data.id} ready for approval`);
     setTimeout(() => pipeline(false), 1600);
   } catch (e) {
@@ -1432,11 +1487,17 @@ $('#go').onclick = async () => {
 
 // Keyboard shortcuts for judges & power users
 window.addEventListener('keydown', (e) => {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-    if (selected && $('#approve')) {
-      e.preventDefault();
-      $('#approve').click();
-    }
+  if (!(e.metaKey || e.ctrlKey) || e.key !== 'Enter') return;
+  // Inside the new-message box the shortcut has to mean "process this".
+  // Approving whatever happens to be selected is never what was intended.
+  if (e.target.id === 'msg') {
+    e.preventDefault();
+    $('#go').click();
+    return;
+  }
+  if (selected && $('#approve')) {
+    e.preventDefault();
+    $('#approve').click();
   }
 });
 
