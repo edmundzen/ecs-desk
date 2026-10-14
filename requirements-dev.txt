@@ -1,0 +1,5 @@
+# Test-only dependencies. Not installed in the Cloud Run image.
+-r requirements.txt
+
+Pillow==12.3.0      # builds the invoice images in tests/make_invoices.py
+requests==2.34.2    # drives the eval suite against a running server

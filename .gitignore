@@ -6,3 +6,4 @@
 __pycache__/
 **/.adk/
 ecs_desk/outbox.json
+tests/results.json
