@@ -1,0 +1,8 @@
+# secrets - never commit
+.env
+**/.env
+# local stuff
+.venv/
+__pycache__/
+**/.adk/
+ecs_desk/outbox.json
