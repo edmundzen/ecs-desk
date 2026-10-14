@@ -567,6 +567,11 @@ button:disabled {
   padding: 14px 16px;
   color: var(--ink);
   display: grid;
+  /* This is a <button>, so it inherits justify-content:center from the global
+     button rule. On a grid that centres the auto-sized column inside the card,
+     indenting every card by a different amount depending on how long its
+     subject line is. */
+  justify-content: stretch;
   gap: 8px;
   cursor: pointer;
   transition: all 0.18s ease;
