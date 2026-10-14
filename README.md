@@ -1,5 +1,9 @@
 # ECS Desk
 
+[![checks](https://github.com/edmundzen/ecs-desk/actions/workflows/checks.yml/badge.svg)](https://github.com/edmundzen/ecs-desk/actions/workflows/checks.yml)
+[![eval](https://img.shields.io/badge/eval-17%2F17%20passing-success)](tests/benchmark.md)
+[![deployed](https://img.shields.io/badge/Cloud%20Run-live-blue)](https://ecs-desk-qiabewya3q-as.a.run.app)
+
 **An AI back office that waits for you.** Three Gemini agents read, sort and draft small-business admin (emails, chat messages, invoice photos). A human approves before anything goes out.
 
 Built for the **AI Builder Cup 2026** (Future of Work & Enterprise Productivity) by Edmund Anthony and Le Shwe Yee Win.
@@ -19,7 +23,14 @@ Nothing reaches a customer until a person clicks Approve.
 | 3 | **Draft** | Writes the reply or internal note, then calls `save_for_approval()`. |
 | 4 | **Human** | Reviews in the dashboard: Approve, Edit or Reject. Nothing is sent automatically. |
 
-Google ADK (`SequentialAgent`) · Gemini · FastAPI · Firestore · Cloud Run.
+![ECS Desk process flow](docs/process-flow.png)
+
+The agents have exactly one tool, `save_for_approval()`. They cannot send,
+confirm or schedule anything, so a message instructing them to "send this now"
+is recorded as a fact about the sender and queued like any other.
+
+Google ADK (`SequentialAgent`) · Gemini · FastAPI · Firestore · Cloud Run ·
+Secret Manager · Cloud Build.
 
 ## 2. Prerequisites
 
@@ -132,17 +143,37 @@ gcloud run deploy ecs-desk \
 curl https://YOUR_SERVICE_URL/api/health        # {"ok":true} - process up, Firestore answering
 ```
 
-Then the full suite ([`tests/README.md`](tests/README.md)):
+Two layers, deliberately separated. **The checks prove the plumbing is sound;
+the eval proves the AI is right.**
+
+**Fast checks** — seconds, no API key, no network, no cost. Syntax, a scan for
+secrets and files that must never be committed, and 26 offline tests of the
+model fallback ladder and enum validation:
 
 ```bash
-python tests/test_fallback.py                        # offline, no API key needed
+python tests/checks.py
+git config core.hooksPath .githooks   # once per clone: run them before each commit
+```
+
+The same checks run on every push via
+[`.github/workflows/checks.yml`](.github/workflows/checks.yml), plus `pip check`
+— `google-adk` and `google-api-core` disagree about `opentelemetry-api`, so a
+bump to either one alone makes the set uninstallable.
+
+**The eval** — 17 live Gemini calls, about fifteen minutes, and real tokens per
+run. Not automated for exactly that reason. Run it before a submission, and
+after any prompt, model or storage change:
+
+```bash
 python tests/make_invoices.py                        # regenerate invoice images
 python tests/run_eval.py --url https://YOUR_SERVICE_URL
+python tests/token_report.py                         # measured cost per message
 ```
 
 `run_eval.py` grades 15 core cases (5 complaints, 5 quotes/bookings,
 5 invoices/other) plus 2 extra safety cases on category, urgency, reply
-language and safety, and writes `tests/benchmark.md`.
+language and safety, and writes `tests/benchmark.md`. See
+[`tests/README.md`](tests/README.md) for what each case defends.
 
 Manual walkthrough:
 
