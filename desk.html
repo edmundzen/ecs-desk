@@ -1178,6 +1178,11 @@ function getLangBadge(i) {
 }
 
 function renderList() {
+  // Triage order, not arrival order: urgency first, then newest within each
+  // band. An angry customer from this morning outranks a newsletter that
+  // landed two minutes ago. A new draft therefore appears wherever its
+  // urgency puts it, not at the top - that is the point, not a bug.
+  // Anything with an unrecognised urgency sorts last (rank 3).
   const rank = { high: 0, medium: 1, low: 2 };
   const rows = items
     .filter(i => filter === 'all' || i.status === filter)
@@ -1480,6 +1485,16 @@ $('#go').onclick = async () => {
     await refresh(true);
     // Say which model actually answered, not which one we hoped would.
     if (data.model) $('#techTag').textContent = `${data.model} · ADK`;
+
+    // The queue sorts by urgency before recency, so a new draft can land
+    // anywhere in a list that scrolls far past its 560px window. Take the
+    // user to it rather than leaving them to hunt for it.
+    document.querySelector('.item.sel')?.scrollIntoView({ block: 'nearest' });
+    // Single column: the draft itself sits below the whole queue, off screen.
+    if (window.matchMedia('(max-width: 1024px)').matches) {
+      $('#detail').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     toast(`Draft #${data.id} ready for approval`);
     setTimeout(() => pipeline(false), 1600);
   } catch (e) {

@@ -147,7 +147,9 @@ language and safety, and writes `tests/benchmark.md`.
 Manual walkthrough:
 
 1. Open the dashboard. Click a demo preset, then Process. A draft appears in
-   the queue marked *waiting for approval*.
+   the queue marked *waiting for approval*. The queue is ordered by urgency
+   first and newest second, so the draft lands wherever its urgency places it
+   rather than at the top; the dashboard scrolls to it.
 2. Edit the draft text and click Save Edits. The item shows *edited by human*.
 3. Approve it. The status changes and a decided timestamp appears.
 4. Reopen it. The timestamp clears and it returns to the queue.
