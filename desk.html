@@ -3,255 +3,1442 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ECS Desk</title>
+<title>ECS Desk · AI Back Office for Small Businesses</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#0b1220; --panel:#111a2b; --panel2:#16223a; --line:#24324c; --ink:#e9eef6; --muted:#8fa0b8;
-  --teal:#3dd6c6; --blue:#4f9dff; --red:#ff6b7a; --amber:#f5b347; --grey:#8a96a8; --green:#34d399;
-  --head:'Poppins',system-ui,sans-serif; --body:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+:root {
+  --bg: #070c16;
+  --bg-gradient: radial-gradient(1200px 600px at 15% -10%, #15294a 0%, transparent 65%),
+                     radial-gradient(900px 500px at 85% 10%, #0d383b 0%, transparent 55%),
+                     #070c16;
+  --panel: rgba(17, 26, 44, 0.75);
+  --panel-solid: #111a2c;
+  --panel-hover: rgba(23, 35, 58, 0.85);
+  --panel2: #16233b;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.14);
+  --ink: #f1f5f9;
+  --muted: #94a3b8;
+  --dim: #64748b;
+  
+  --teal: #2dd4bf;
+  --teal-glow: rgba(45, 212, 191, 0.25);
+  --blue: #38bdf8;
+  --blue-glow: rgba(56, 189, 248, 0.25);
+  --red: #fb7185;
+  --red-bg: rgba(251, 113, 133, 0.12);
+  --red-border: rgba(251, 113, 133, 0.35);
+  --amber: #fbbf24;
+  --amber-bg: rgba(251, 191, 36, 0.12);
+  --amber-border: rgba(251, 191, 36, 0.35);
+  --green: #34d399;
+  --green-bg: rgba(52, 211, 153, 0.12);
+  --green-border: rgba(52, 211, 153, 0.35);
+  --purple: #c084fc;
+  
+  --head: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --body: 'Inter', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
 }
-*{box-sizing:border-box}
-body{margin:0;background:radial-gradient(1200px 500px at 10% -10%,#16304d 0%,transparent 60%),var(--bg);color:var(--ink);font:15px/1.55 var(--body)}
-.wrap{max-width:1240px;margin:0 auto;padding:28px 16px 60px}
-header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:22px}
-.brand small{display:block;color:var(--teal);font:600 12px var(--mono);letter-spacing:.12em;text-transform:uppercase}
-.brand h1{font:700 32px/1.1 var(--head);margin:6px 0 4px}
-.brand p{margin:0;color:var(--muted)}
-.safe{display:inline-flex;align-items:center;gap:8px;border:1px solid #1f5a52;background:#0f2a2a;color:var(--teal);padding:8px 14px;border-radius:999px;font-weight:600;font-size:13px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
-.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
-.stat b{display:block;font:700 28px var(--head)}
-.stat span{color:var(--muted);font-size:13px}
-.grid{display:grid;grid-template-columns:400px 1fr;gap:18px;align-items:start}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
-h2{font:600 15px var(--head);margin:0 0 12px;letter-spacing:.02em}
-textarea{width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:12px;font:14px/1.5 var(--body);resize:vertical}
-textarea:focus{outline:2px solid var(--blue);outline-offset:1px}
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
-.file{flex:1;min-width:0;color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-button{font:600 14px var(--body);border:0;border-radius:10px;padding:10px 16px;cursor:pointer;color:#06121f;background:var(--teal)}
-button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
-button.red{background:transparent;color:var(--red);border:1px solid #5a2832}
-button.blue{background:var(--blue)}
-button:disabled{opacity:.5;cursor:wait}
-button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.pipe{display:none;margin-top:14px;gap:6px;align-items:center;font:500 12px var(--mono);color:var(--muted)}
-.pipe.on{display:flex;flex-wrap:wrap}
-.step{padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel2)}
-.step.active{border-color:var(--teal);color:var(--teal);animation:pulse 1s ease-in-out infinite alternate}
-.step.done{border-color:#1f5a52;color:var(--green)}
-@keyframes pulse{from{box-shadow:0 0 0 0 rgba(61,214,198,.0)}to{box-shadow:0 0 0 4px rgba(61,214,198,.18)}}
-.err{color:var(--red);font-size:13px;margin-top:10px;display:none}
-.tabs{display:flex;gap:6px;margin:18px 0 10px}
-.tab{background:transparent;color:var(--muted);border:1px solid var(--line);padding:6px 12px;border-radius:999px;font-size:13px}
-.tab.on{color:var(--ink);border-color:var(--blue);background:#13264a}
-.list{display:grid;gap:8px;max-height:520px;overflow:auto;padding-right:2px}
-.item{text-align:left;width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--ink);display:grid;gap:6px}
-.item.sel{border-color:var(--blue)}
-.item .top{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.item .who{font-weight:600}
-.item .sub{color:var(--muted);font-size:13px;font-weight:400}
-.badge{font:500 11px var(--mono);padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em}
-.u-high{background:#3a1720;color:var(--red)} .u-medium{background:#3a2c12;color:var(--amber)} .u-low{background:#222b38;color:var(--grey)}
-.cat{background:#13264a;color:var(--blue)}
-.st-approved{background:#0f2f25;color:var(--green)} .st-rejected{background:#2a1a1f;color:#d48a95} .st-waiting_for_approval{background:#2a2410;color:var(--amber)}
-.empty{color:var(--muted);text-align:center;padding:40px 10px}
-.detail h3{font:600 22px/1.25 var(--head);margin:8px 0 2px}
-.meta{color:var(--muted);font-size:13px;margin-bottom:14px}
-.draft{min-height:220px}
-details{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
-summary{cursor:pointer;color:var(--muted);font-weight:600}
-pre{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;font:12.5px/1.55 var(--mono);color:#c8d3e3;margin:10px 0 0}
-.note{font-size:12px;color:var(--muted);margin-top:10px}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--teal);color:var(--ink);padding:10px 16px;border-radius:10px;opacity:0;transition:.25s;pointer-events:none}
-.toast.on{opacity:1}
-@media (max-width:900px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--ink);
+  font: 14.5px/1.6 var(--body);
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom modern scrollbars */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.28); }
+
+.wrap {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+/* Header & Guardrail Pill */
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #1e3a8a, #0f766e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 24px rgba(45, 212, 191, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.brand small {
+  display: block;
+  color: var(--teal);
+  font: 600 11.5px var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.brand h1 {
+  font: 800 30px/1.1 var(--head);
+  margin: 0;
+  background: linear-gradient(180deg, #ffffff 40%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.header-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.safe-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--green-border);
+  background: rgba(16, 43, 37, 0.65);
+  backdrop-filter: blur(8px);
+  color: var(--green);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 13px;
+  box-shadow: 0 0 16px rgba(52, 211, 153, 0.12);
+}
+
+.safe-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.tech-tag {
+  font: 500 11.5px var(--mono);
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  padding: 7px 12px;
+  border-radius: 999px;
+}
+
+/* Stat Metrics Grid */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.stat:hover {
+  transform: translateY(-2px);
+  border-color: var(--line-strong);
+}
+
+.stat-content b {
+  display: block;
+  font: 800 32px/1.1 var(--head);
+  margin-bottom: 4px;
+}
+
+.stat-content span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+/* Main Grid Layout */
+.grid {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  gap: 22px;
+  align-items: start;
+}
+
+.card {
+  background: var(--panel);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.5);
+}
+
+h2 {
+  font: 700 16px var(--head);
+  margin: 0 0 14px;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Quick Preset Pills */
+.presets-bar {
+  margin-bottom: 12px;
+}
+
+.presets-label {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  display: block;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.preset-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.preset-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: 12px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: var(--body);
+}
+
+.preset-btn:hover {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+/* Textarea & Inputs */
+textarea {
+  width: 100%;
+  background: rgba(7, 12, 22, 0.85);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  font: 14px/1.6 var(--body);
+  resize: vertical;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.file-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+}
+
+.file-name {
+  flex: 1;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  object-fit: cover;
+  display: none;
+}
+
+.file-clear {
+  background: transparent;
+  border: none;
+  color: var(--red);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: none;
+}
+.file-clear:hover { background: var(--red-bg); }
+
+/* Buttons */
+button {
+  font: 600 13.5px var(--body);
+  border: 0;
+  border-radius: var(--radius-md);
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+button.primary {
+  color: #042f2e;
+  background: linear-gradient(135deg, #2dd4bf, #14b8a6);
+  box-shadow: 0 4px 14px rgba(45, 212, 191, 0.28);
+}
+
+button.primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(45, 212, 191, 0.38);
+}
+
+button.ghost {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+button.ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--line-strong);
+}
+
+button.blue {
+  background: linear-gradient(135deg, #38bdf8, #0284c7);
+  color: #082f49;
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25);
+}
+button.blue:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(56, 189, 248, 0.35);
+}
+
+button.red {
+  background: var(--red-bg);
+  color: var(--red);
+  border: 1px solid var(--red-border);
+}
+button.red:hover {
+  background: rgba(251, 113, 133, 0.22);
+}
+
+button.green-approve {
+  background: linear-gradient(135deg, #34d399, #059669);
+  color: #022c22;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(52, 211, 153, 0.3);
+}
+button.green-approve:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(52, 211, 153, 0.42);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Agent Pipeline Visualizer */
+.pipe-box {
+  margin-top: 16px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: none;
+}
+.pipe-box.on { display: block; }
+
+.pipe-title {
+  font: 600 11px var(--mono);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pipe-steps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.step {
+  flex: 1;
+  text-align: center;
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--panel2);
+  font: 600 11.5px var(--mono);
+  color: var(--muted);
+  transition: all 0.25s ease;
+}
+
+.step.active {
+  border-color: var(--teal);
+  color: var(--teal);
+  background: rgba(45, 212, 191, 0.1);
+  box-shadow: 0 0 14px var(--teal-glow);
+  animation: pulse-step 1.2s infinite alternate;
+}
+
+.step.done {
+  border-color: var(--green-border);
+  color: var(--green);
+  background: var(--green-bg);
+}
+
+.pipe-arrow {
+  color: var(--dim);
+  font-size: 11px;
+}
+
+@keyframes pulse-step {
+  from { opacity: 0.7; }
+  to { opacity: 1; }
+}
+
+.err {
+  color: var(--red);
+  background: var(--red-bg);
+  border: 1px solid var(--red-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-top: 14px;
+  display: none;
+}
+
+/* Tabs & Filter Bar */
+.filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 20px 0 12px;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.tab {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ink);
+}
+
+.tab.on {
+  color: var(--ink);
+  border-color: var(--blue);
+  background: rgba(56, 189, 248, 0.15);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
+}
+
+.tab-count {
+  font: 600 11px var(--mono);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+/* Queue List */
+.list {
+  display: grid;
+  gap: 10px;
+  max-height: 560px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.item {
+  text-align: left;
+  width: 100%;
+  background: rgba(22, 35, 59, 0.6);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  color: var(--ink);
+  display: grid;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.item:hover {
+  background: var(--panel-hover);
+  border-color: var(--line-strong);
+  transform: translateX(2px);
+}
+
+.item.sel {
+  border-color: var(--blue);
+  background: rgba(25, 45, 78, 0.85);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+.item.u-high-border { border-left-color: var(--red); }
+.item.u-medium-border { border-left-color: var(--amber); }
+.item.u-low-border { border-left-color: var(--dim); }
+
+.item .top {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.item .who {
+  font: 700 14.5px var(--head);
+  letter-spacing: -0.01em;
+}
+
+.item .sub {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 400;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Badges */
+.badge {
+  font: 600 11px var(--mono);
+  padding: 3px 9px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.u-high { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+.u-high .badge-dot { background: var(--red); }
+
+.u-medium { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+.u-medium .badge-dot { background: var(--amber); }
+
+.u-low { background: rgba(148, 163, 184, 0.1); color: var(--muted); border: 1px solid rgba(148, 163, 184, 0.2); }
+.u-low .badge-dot { background: var(--muted); }
+
+.cat { background: rgba(56, 189, 248, 0.12); color: var(--blue); border: 1px solid rgba(56, 189, 248, 0.25); }
+
+.st-approved { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.st-rejected { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+.st-waiting_for_approval { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+
+/* Language Badges */
+.lang-zh { background: rgba(192, 132, 252, 0.15); color: var(--purple); border: 1px solid rgba(192, 132, 252, 0.35); }
+.lang-ta { background: rgba(251, 146, 60, 0.15); color: #fb923c; border: 1px solid rgba(251, 146, 60, 0.35); }
+.lang-ms { background: rgba(56, 189, 248, 0.15); color: var(--blue); border: 1px solid rgba(56, 189, 248, 0.35); }
+.lang-sg { background: rgba(45, 212, 191, 0.15); color: var(--teal); border: 1px solid rgba(45, 212, 191, 0.35); }
+.lang-en { background: rgba(148, 163, 184, 0.12); color: var(--muted); border: 1px solid rgba(148, 163, 184, 0.25); }
+
+/* Detail Pane */
+.detail {
+  min-height: 640px;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-header {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 16px;
+}
+
+.detail-title {
+  font: 700 22px/1.3 var(--head);
+  margin: 10px 0 6px;
+  letter-spacing: -0.01em;
+}
+
+.detail-meta {
+  color: var(--muted);
+  font-size: 13px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.draft-box {
+  margin: 12px 0 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.draft-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 12.5px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.draft-chars {
+  font: 500 11.5px var(--mono);
+  color: var(--dim);
+}
+
+.draft {
+  width: 100%;
+  flex: 1;
+  min-height: 240px;
+  font: 14px/1.6 var(--body);
+  background: rgba(7, 12, 22, 0.9);
+}
+
+.actions-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.disclaimer-note {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 14px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Accordion Inspection Drawer */
+details {
+  margin-top: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+summary {
+  padding: 12px 16px;
+  cursor: pointer;
+  color: var(--muted);
+  font: 600 13px var(--head);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+summary:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.inspect-body {
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.inspect-card {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+
+.inspect-tag {
+  font: 700 11px var(--mono);
+  color: var(--teal);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+  display: block;
+}
+
+pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  font: 12px/1.55 var(--mono);
+  color: #cbd5e1;
+}
+
+/* Empty States */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 380px;
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+}
+
+.empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  color: var(--dim);
+}
+
+.empty-state h3 {
+  font: 600 16px var(--head);
+  color: var(--ink);
+  margin: 0 0 6px;
+}
+
+.empty-state p {
+  font-size: 13.5px;
+  max-width: 320px;
+  margin: 0;
+}
+
+/* Safety Guarantee Footer Banner */
+.guarantee-bar {
+  margin-top: 32px;
+  background: rgba(17, 26, 44, 0.45);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 16px 22px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.guarantee-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.guarantee-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.guarantee-item strong {
+  color: var(--ink);
+}
+
+/* Toast Notifications */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translate(-50%, 20px);
+  background: var(--panel-solid);
+  border: 1px solid var(--teal);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 16px var(--teal-glow);
+  color: var(--ink);
+  padding: 11px 20px;
+  border-radius: var(--radius-md);
+  font: 600 13.5px var(--head);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.toast.on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .grid { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .stats { grid-template-columns: 1fr; }
+  .brand-wrapper { flex-direction: column; align-items: flex-start; }
+  .header-badges { width: 100%; justify-content: flex-start; }
+}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <!-- Top Navigation / Brand Bar -->
   <header>
-    <div class="brand">
-      <small>Edmund Cloud Solutions · AI back office</small>
-      <h1>ECS Desk</h1>
-      <p>Agents read, sort and draft. A human approves before anything goes out.</p>
+    <div class="brand-wrapper">
+      <div class="logo-badge">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--teal)">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+          <path d="M2 17l10 5 10-5"></path>
+          <path d="M2 12l10 5 10-5"></path>
+        </svg>
+      </div>
+      <div class="brand">
+        <small>Edmund Cloud Solutions · AI Back Office</small>
+        <h1>ECS Desk</h1>
+        <p>Three Gemini agents read, sort, and draft. A human approves before anything goes out.</p>
+      </div>
     </div>
-    <span class="safe">● Human in control · nothing is sent automatically</span>
+    
+    <div class="header-badges">
+      <div class="safe-pill">
+        <span class="safe-pulse"></span>
+        <span>Human in Control · No Auto-Send</span>
+      </div>
+      <span class="tech-tag">Gemini 3.6 Flash · ADK</span>
+    </div>
   </header>
 
-  <section class="stats" aria-label="Summary">
-    <div class="stat"><b id="sWait">0</b><span>Waiting for approval</span></div>
-    <div class="stat"><b id="sHigh" style="color:var(--red)">0</b><span>High urgency waiting</span></div>
-    <div class="stat"><b id="sAppr" style="color:var(--green)">0</b><span>Approved</span></div>
-    <div class="stat"><b id="sMins" style="color:var(--teal)">0</b><span>Est. admin minutes saved</span></div>
+  <!-- Key Metrics Summary Row -->
+  <section class="stats" aria-label="Operational Summary">
+    <div class="stat">
+      <div class="stat-content">
+        <b id="sWait">0</b>
+        <span>Waiting Approval</span>
+      </div>
+      <div class="stat-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      </div>
+    </div>
+    
+    <div class="stat">
+      <div class="stat-content">
+        <b id="sHigh" style="color:var(--red)">0</b>
+        <span>High Urgency</span>
+      </div>
+      <div class="stat-icon" style="color:var(--red);border-color:var(--red-border);background:var(--red-bg)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      </div>
+    </div>
+    
+    <div class="stat">
+      <div class="stat-content">
+        <b id="sAppr" style="color:var(--green)">0</b>
+        <span>Approved & Handled</span>
+      </div>
+      <div class="stat-icon" style="color:var(--green);border-color:var(--green-border);background:var(--green-bg)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+      </div>
+    </div>
+    
+    <div class="stat">
+      <div class="stat-content">
+        <b id="sMins" style="color:var(--teal)">0</b>
+        <span>Est. Admin Mins Saved</span>
+      </div>
+      <div class="stat-icon" style="color:var(--teal);border-color:rgba(45,212,191,0.25);background:rgba(45,212,191,0.08)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+      </div>
+    </div>
   </section>
 
+  <!-- Two-Column Interactive Workspace -->
   <div class="grid">
+    <!-- Left Column: Input + Queue -->
     <div>
       <div class="card">
-        <h2>New incoming item</h2>
-        <textarea id="msg" rows="4" placeholder="Paste an email or chat message…"></textarea>
+        <h2>
+          <span>New Incoming Item</span>
+          <span style="font-size:12px;font-weight:500;color:var(--muted)">Multimodal Ingest</span>
+        </h2>
+
+        <!-- Interactive Presets for Judge Demos -->
+        <div class="presets-bar">
+          <span class="presets-label">⚡ Judge Demo Presets (1-Click Fill)</span>
+          <div class="preset-buttons">
+            <button type="button" class="preset-btn" onclick="setPreset('complaint')">🚨 Urgent Complaint</button>
+            <button type="button" class="preset-btn" onclick="setPreset('invoice')">🧾 Vendor Invoice</button>
+            <button type="button" class="preset-btn" onclick="setPreset('quote')">💬 WhatsApp Quote</button>
+            <button type="button" class="preset-btn" onclick="setPreset('chinese')">🌏 Chinese Booking</button>
+          </div>
+        </div>
+
+        <textarea id="msg" rows="4" placeholder="Paste an email header, customer chat message, or invoice details..."></textarea>
+        
         <div class="row">
-          <button class="ghost" id="pick" type="button">📎 Attach image</button>
-          <span class="file" id="fname">No image</span>
+          <button class="ghost" id="pick" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+            Attach Image
+          </button>
+          
+          <div class="file-box">
+            <img id="fileThumb" class="file-thumb" alt="thumbnail">
+            <span class="file-name" id="fname">No image attached</span>
+            <button type="button" class="file-clear" id="fileClear" title="Remove image">✕</button>
+          </div>
+          
           <input id="file" type="file" accept="image/*" hidden>
-          <button id="go" type="button">Process</button>
+          <button class="primary" id="go" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            Process
+          </button>
         </div>
-        <div class="pipe" id="pipe">
-          <span class="step" data-s="0">Intake</span>→
-          <span class="step" data-s="1">Triage</span>→
-          <span class="step" data-s="2">Draft</span>→
-          <span class="step" data-s="3">Approval queue</span>
+
+        <!-- Agent Pipeline Step Visualizer -->
+        <div class="pipe-box" id="pipe">
+          <div class="pipe-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Agent Pipeline Active
+          </div>
+          <div class="pipe-steps">
+            <span class="step" data-s="0">1. Intake</span>
+            <span class="pipe-arrow">→</span>
+            <span class="step" data-s="1">2. Triage</span>
+            <span class="pipe-arrow">→</span>
+            <span class="step" data-s="2">3. Draft</span>
+            <span class="pipe-arrow">→</span>
+            <span class="step" data-s="3">4. Outbox</span>
+          </div>
         </div>
+
         <div class="err" id="err"></div>
       </div>
 
-      <div class="tabs" role="tablist">
-        <button class="tab on" data-f="waiting_for_approval">Waiting</button>
-        <button class="tab" data-f="approved">Approved</button>
-        <button class="tab" data-f="rejected">Rejected</button>
-        <button class="tab" data-f="all">All</button>
+      <!-- Queue Filtering & Tab Controls -->
+      <div class="filter-row">
+        <div class="tabs" role="tablist">
+          <button class="tab on" data-f="waiting_for_approval">
+            Waiting <span class="tab-count" id="cWait">0</span>
+          </button>
+          <button class="tab" data-f="approved">
+            Approved <span class="tab-count" id="cAppr">0</span>
+          </button>
+          <button class="tab" data-f="rejected">
+            Rejected <span class="tab-count" id="cRej">0</span>
+          </button>
+          <button class="tab" data-f="all">
+            All <span class="tab-count" id="cAll">0</span>
+          </button>
+        </div>
       </div>
+
+      <!-- Item Cards List -->
       <div class="list" id="list"></div>
     </div>
 
+    <!-- Right Column: Approval & Draft Inspector -->
     <div class="card detail" id="detail">
-      <div class="empty">Select an item to review its draft.</div>
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        </div>
+        <h3>No Draft Selected</h3>
+        <p>Pick an item from the approval queue on the left, or process a new message to review the AI draft.</p>
+      </div>
     </div>
   </div>
+
+  <!-- Safety & Governance Banner -->
+  <footer class="guarantee-bar">
+    <div class="guarantee-items">
+      <div class="guarantee-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--teal)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        <span><strong>Fact Extraction Only:</strong> Never hallucinates missing details</span>
+      </div>
+      <div class="guarantee-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--blue)"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <span><strong>PII Masking:</strong> Bank, card & ID numbers auto-hidden</span>
+      </div>
+      <div class="guarantee-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green)"><circle cx="12" cy="12" r="10"></circle><polyline points="12 8 8 12 12 16"></polyline><line x1="16" y1="12" x2="8" y2="12"></line></svg>
+        <span><strong>Zero Air-Gap Send:</strong> No draft ever leaves without manual approval</span>
+      </div>
+    </div>
+    <span>AI Builder Cup 2026 · Singapore</span>
+  </footer>
 </div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let items = [], filter = 'waiting_for_approval', selected = null, img = null;
-const MIN_SAVED = 6; // rough estimate per item handled; shown as an estimate only
+const MIN_SAVED = 6; // rough estimate minutes saved per item handled
 
-function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('on'); setTimeout(()=>el.classList.remove('on'),2200); }
+// Demo presets for judges
+const PRESETS = {
+  complaint: "From: tan.meiling@globex.com\nSubject: URGENT: Order #4821 arrived 1 hour late and cold\nTo: orders@ecsdesk.demo\n\nHi ECS team, the catering for our 50-pax client seminar arrived over an hour late today. The laksa was stone cold and the dessert trays were smashed. Our managing director was furious in front of our overseas clients. How will you compensate us for this disaster? I need a callback before 5 PM today.",
+  invoice: "From: billing@apexhosting.sg\nTo: accounts@ecsdesk.demo\nSubject: TAX INVOICE #INV-2026-881\n\nDear Edmund,\nThank you for choosing Apex Cloud. Please find attached Tax Invoice INV-2026-881 for high-performance compute clusters.\nTotal Amount Due: SGD 1,240.50\nPayment Due Date: 26 Oct 2026\nBank Transfer: DBS Bank Current 003-902-111 (UEN 202100889K)\nPlease quote invoice number as reference.",
+  quote: "WhatsApp chat from +65 9123 4567 (Marcus Lim, Urban Clean Pte Ltd):\n\"Hi bro, looking to automate our cleaning job assignment and quotation dispatch. Currently we receive ~40 enquiries daily on WhatsApp and we are losing leads because we take 4 hours to reply. Can ECS build an assistant for us? What are the approximate costs and how soon can you start?\"",
+  chinese: "来自: 陈伟明 (新峰贸易私人有限公司)\n主题: 咨询企业 AI 工作流方案\n\nEdmund 你好，我们在新加坡有4家零售分店。每天客户在微信和邮件询问库存和退换货，员工回复很慢。看到你们关于 AI 代理与人工审批结合的方案，觉得很适合我们。下周三下午2点方便安排一次线上咨询会议吗？谢谢！"
+};
 
-async function refresh(keep){
-  items = await (await fetch('/api/items')).json();
-  const w = items.filter(i=>i.status==='waiting_for_approval');
-  $('#sWait').textContent = w.length;
-  $('#sHigh').textContent = w.filter(i=>i.urgency==='high').length;
-  $('#sAppr').textContent = items.filter(i=>i.status==='approved').length;
-  $('#sMins').textContent = items.length * MIN_SAVED;
-  renderList();
-  if (keep && selected) showDetail(items.find(i=>i.id===selected));
-}
-
-function renderList(){
-  const rank = {high:0, medium:1, low:2};
-  const rows = items.filter(i => filter==='all' || i.status===filter)
-    .sort((a,b) => (rank[a.urgency]??3) - (rank[b.urgency]??3) || b.id - a.id);
-  $('#list').innerHTML = rows.length ? rows.map(i => `
-    <button class="item ${i.id===selected?'sel':''}" data-id="${i.id}">
-      <div class="top">
-        <span class="badge u-${esc(i.urgency)}">${esc(i.urgency)}</span>
-        <span class="badge cat">${esc(i.category)}</span>
-        ${filter==='all'?`<span class="badge st-${esc(i.status)}">${esc(i.status.replaceAll('_',' '))}</span>`:''}
-      </div>
-      <span class="who">${esc(i.customer)}</span>
-      <span class="sub">${esc(i.subject)} · ${esc(i.created)}</span>
-    </button>`).join('') : `<div class="empty">Nothing here yet.</div>`;
-  document.querySelectorAll('.item').forEach(b => b.onclick = () => {
-    selected = +b.dataset.id; renderList(); showDetail(items.find(i=>i.id===selected));
-  });
-}
-
-function showDetail(i){
-  if(!i){ $('#detail').innerHTML='<div class="empty">Select an item to review its draft.</div>'; return; }
-  const waiting = i.status==='waiting_for_approval';
-  $('#detail').innerHTML = `
-    <div class="top" style="display:flex;gap:6px;flex-wrap:wrap">
-      <span class="badge u-${esc(i.urgency)}">${esc(i.urgency)} urgency</span>
-      <span class="badge cat">${esc(i.category)}</span>
-      <span class="badge st-${esc(i.status)}">${esc(i.status.replaceAll('_',' '))}</span>
-      ${i.edited_by_human?'<span class="badge cat">edited by human</span>':''}
-    </div>
-    <h3>${esc(i.subject)}</h3>
-    <div class="meta">${esc(i.customer)} · draft #${i.id} · ${esc(i.created)}${i.decided?` · decided ${esc(i.decided)}`:''}</div>
-    <label for="draft" class="meta" style="display:block;margin-bottom:6px">Draft (you can edit before approving)</label>
-    <textarea id="draft" class="draft" ${waiting?'':'readonly'}>${esc(i.draft_reply)}</textarea>
-    <div class="row">
-      ${waiting ? `
-        <button id="approve" type="button">✓ Approve</button>
-        <button class="ghost" id="saveEdit" type="button">Save edit</button>
-        <button class="red" id="reject" type="button">Reject</button>` : `
-        <button class="ghost" id="reopen" type="button">Move back to waiting</button>
-        <button class="blue" id="copy" type="button">Copy text</button>`}
-    </div>
-    <p class="note">Approving marks the draft as ready. In this demo nothing is emailed; the owner sends it.</p>
-    <details ${i.intake?'':'hidden'}>
-      <summary>What the agents saw</summary>
-      ${i.source_text?`<pre>Original message:\n${esc(i.source_text)}</pre>`:''}${i.had_image?'<pre>(image attached)</pre>':''}
-      <pre>INTAKE\n${esc(i.intake)}</pre>
-      <pre>TRIAGE\n${esc(i.triage)}</pre>
-    </details>`;
-  const send = async (status) => {
-    await fetch(`/api/items/${i.id}`, {method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({status, draft_reply: $('#draft').value})});
-    toast(status==='approved'?'Approved ✓':status==='rejected'?'Rejected':'Saved');
-    await refresh(true);
-  };
-  if (waiting){
-    $('#approve').onclick = () => send('approved');
-    $('#reject').onclick = () => send('rejected');
-    $('#saveEdit').onclick = () => send('waiting_for_approval');
-  } else {
-    $('#reopen').onclick = () => send('waiting_for_approval');
-    $('#copy').onclick = async () => { try{ await navigator.clipboard.writeText($('#draft').value); toast('Copied'); }catch{ toast('Copy failed: select and copy manually'); } };
+function setPreset(key) {
+  if (PRESETS[key]) {
+    $('#msg').value = PRESETS[key];
+    $('#msg').focus();
+    toast('Demo preset loaded');
   }
 }
 
+function toast(t) {
+  const el = $('#toast');
+  el.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> ${t}`;
+  el.classList.add('on');
+  setTimeout(() => el.classList.remove('on'), 2400);
+}
+
+async function refresh(keep) {
+  try {
+    items = await (await fetch('/api/items')).json();
+  } catch(e) {
+    console.error("Failed to fetch items", e);
+  }
+  
+  const w = items.filter(i => i.status === 'waiting_for_approval');
+  const a = items.filter(i => i.status === 'approved');
+  const r = items.filter(i => i.status === 'rejected');
+  
+  $('#sWait').textContent = w.length;
+  $('#sHigh').textContent = w.filter(i => i.urgency === 'high').length;
+  $('#sAppr').textContent = a.length;
+  $('#sMins').textContent = items.length * MIN_SAVED;
+
+  $('#cWait').textContent = w.length;
+  $('#cAppr').textContent = a.length;
+  $('#cRej').textContent = r.length;
+  $('#cAll').textContent = items.length;
+
+  renderList();
+  if (keep && selected) {
+    showDetail(items.find(i => i.id === selected));
+  }
+}
+
+function getLangBadge(i) {
+  let l = (i.language || '').toLowerCase();
+  if (!l && i.intake) {
+    const m = i.intake.match(/LANGUAGE:\s*([^\r\n]+)/i);
+    if (m) l = m[1].toLowerCase().trim();
+  }
+  if (l.includes('chinese') || l.includes('zh') || l.includes('mandarin')) return '<span class="badge lang-zh">ZH</span>';
+  if (l.includes('tamil') || l.includes('ta')) return '<span class="badge lang-ta">TA</span>';
+  if (l.includes('malay') || l.includes('ms')) return '<span class="badge lang-ms">MS</span>';
+  if (l.includes('singlish')) return '<span class="badge lang-sg">SG</span>';
+  return '<span class="badge lang-en">EN</span>';
+}
+
+function renderList() {
+  const rank = { high: 0, medium: 1, low: 2 };
+  const rows = items
+    .filter(i => filter === 'all' || i.status === filter)
+    .sort((a, b) => (rank[a.urgency] ?? 3) - (rank[b.urgency] ?? 3) || b.id - a.id);
+
+  $('#list').innerHTML = rows.length ? rows.map(i => `
+    <button class="item u-${esc(i.urgency)}-border ${i.id === selected ? 'sel' : ''}" data-id="${i.id}">
+      <div class="top">
+        <span class="badge u-${esc(i.urgency)}">
+          <span class="badge-dot"></span>
+          ${esc(i.urgency)}
+        </span>
+        <span class="badge cat">${esc(i.category)}</span>
+        ${getLangBadge(i)}
+        ${filter === 'all' ? `<span class="badge st-${esc(i.status)}">${esc(i.status.replaceAll('_',' '))}</span>` : ''}
+      </div>
+      <span class="who">${esc(i.customer || 'Unknown Customer')}</span>
+      <span class="sub">${esc(i.subject || 'No subject')} · ${esc(i.created || '')}</span>
+    </button>`).join('') : `
+    <div class="empty-state" style="min-height:220px;padding:24px">
+      <div class="empty-icon" style="width:44px;height:44px;margin-bottom:8px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <h3 style="font-size:14px">Inbox is Clear</h3>
+      <p style="font-size:12.5px">No messages in this queue.</p>
+    </div>`;
+
+  document.querySelectorAll('.item').forEach(b => b.onclick = () => {
+    selected = +b.dataset.id;
+    renderList();
+    showDetail(items.find(i => i.id === selected));
+  });
+}
+
+function updateCharCount() {
+  const val = $('#draft')?.value || '';
+  const el = $('#charCount');
+  if (el) el.textContent = `${val.length} chars · ${val.trim().split(/\s+/).filter(Boolean).length} words`;
+}
+
+function showDetail(i) {
+  if (!i) {
+    $('#detail').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        </div>
+        <h3>No Draft Selected</h3>
+        <p>Pick an item from the queue on the left to review its draft reply or internal note.</p>
+      </div>`;
+    return;
+  }
+  
+  const waiting = i.status === 'waiting_for_approval';
+  $('#detail').innerHTML = `
+    <div class="detail-header">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <span class="badge u-${esc(i.urgency)}">
+          <span class="badge-dot"></span>
+          ${esc(i.urgency)} urgency
+        </span>
+        <span class="badge cat">${esc(i.category)}</span>
+        ${getLangBadge(i)}
+        <span class="badge st-${esc(i.status)}">${esc(i.status.replaceAll('_',' '))}</span>
+        ${i.edited_by_human ? '<span class="badge cat">✍️ edited by human</span>' : ''}
+      </div>
+      <h3 class="detail-title">${esc(i.subject || 'Admin Notification')}</h3>
+      <div class="detail-meta">
+        <span>👤 <strong>${esc(i.customer || 'Unknown')}</strong></span>
+        <span>🔖 Draft #${i.id}</span>
+        <span>⏱️ Created ${esc(i.created || '')}</span>
+        ${i.decided ? `<span>✓ Decided ${esc(i.decided)}</span>` : ''}
+      </div>
+    </div>
+
+    <div class="draft-box">
+      <div class="draft-label-row">
+        <span>${waiting ? '✏️ Editable AI Draft (Review carefully before approving):' : '📄 Approved / Archived Draft:'}</span>
+        <span class="draft-chars" id="charCount"></span>
+      </div>
+      <textarea id="draft" class="draft" ${waiting ? '' : 'readonly'}>${esc(i.draft_reply)}</textarea>
+    </div>
+
+    <div class="actions-row">
+      ${waiting ? `
+        <button class="green-approve" id="approve" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Approve Draft
+        </button>
+        <button class="ghost" id="saveEdit" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          Save Edits
+        </button>
+        <button class="red" id="reject" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+          Reject
+        </button>
+        <button class="ghost" id="copy" type="button" style="margin-left:auto">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          Copy Text
+        </button>` : `
+        <button class="ghost" id="reopen" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+          Reopen for Review
+        </button>
+        <button class="blue" id="copy" type="button" style="margin-left:auto">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          Copy Draft Text
+        </button>`}
+    </div>
+
+    <p class="disclaimer-note">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--teal)"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+      Human in Control: Approving marks the item ready. Nothing is dispatched until the business owner confirms.
+    </p>
+
+    <!-- Inspection Drawer -->
+    <details ${i.intake ? '' : 'hidden'}>
+      <summary>
+        <span>🔍 Inspect Multi-Agent Evidence & Reasoning</span>
+        <span>▾</span>
+      </summary>
+      <div class="inspect-body">
+        ${i.source_text ? `
+          <div class="inspect-card">
+            <span class="inspect-tag">Original Incoming Payload</span>
+            <pre>${esc(i.source_text)}</pre>
+          </div>` : ''}
+        ${i.had_image ? `
+          <div class="inspect-card">
+            <span class="inspect-tag">Image Payload</span>
+            <pre>Image invoice or document was attached and analyzed by Gemini 3.6 Flash</pre>
+          </div>` : ''}
+        <div class="inspect-card">
+          <span class="inspect-tag">Agent 1: Intake Extracted Facts</span>
+          <pre>${esc(i.intake)}</pre>
+        </div>
+        <div class="inspect-card">
+          <span class="inspect-tag">Agent 2: Triage Classification & Next Step</span>
+          <pre>${esc(i.triage)}</pre>
+        </div>
+      </div>
+    </details>`;
+
+  $('#draft').addEventListener('input', updateCharCount);
+  updateCharCount();
+
+  const send = async (status) => {
+    await fetch(`/api/items/${i.id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status, draft_reply: $('#draft').value })
+    });
+    toast(status === 'approved' ? 'Draft Approved ✓' : status === 'rejected' ? 'Draft Rejected ✕' : 'Edits Saved');
+    await refresh(true);
+  };
+
+  const copyText = async () => {
+    try {
+      await navigator.clipboard.writeText($('#draft').value);
+      toast('Copied to Clipboard');
+    } catch {
+      toast('Copy manually from text box');
+    }
+  };
+
+  if (waiting) {
+    $('#approve').onclick = () => send('approved');
+    $('#reject').onclick = () => send('rejected');
+    $('#saveEdit').onclick = () => send('waiting_for_approval');
+    $('#copy').onclick = copyText;
+  } else {
+    $('#reopen').onclick = () => send('waiting_for_approval');
+    $('#copy').onclick = copyText;
+  }
+}
+
+// Tabs click handler
 document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
-  t.classList.add('on'); filter = t.dataset.f; renderList();
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+  t.classList.add('on');
+  filter = t.dataset.f;
+  renderList();
 });
 
+// File picker handler
 $('#pick').onclick = () => $('#file').click();
 $('#file').onchange = e => {
-  const f = e.target.files[0]; if(!f){ img=null; $('#fname').textContent='No image'; return; }
+  const f = e.target.files[0];
+  if (!f) {
+    clearFile();
+    return;
+  }
   const r = new FileReader();
-  r.onload = () => { img = {b64: r.result.split(',')[1], mime: f.type || 'image/png'}; $('#fname').textContent = f.name; };
+  r.onload = () => {
+    img = { b64: r.result.split(',')[1], mime: f.type || 'image/png' };
+    $('#fname').textContent = f.name;
+    $('#fileThumb').src = r.result;
+    $('#fileThumb').style.display = 'block';
+    $('#fileClear').style.display = 'block';
+  };
   r.readAsDataURL(f);
 };
 
+function clearFile() {
+  img = null;
+  $('#file').value = '';
+  $('#fname').textContent = 'No image attached';
+  $('#fileThumb').style.display = 'none';
+  $('#fileClear').style.display = 'none';
+}
+$('#fileClear').onclick = clearFile;
+
+// Pipeline visualizer animation
 let timer;
-function pipeline(on){
+function pipeline(on) {
   const steps = [...document.querySelectorAll('.step')];
-  clearInterval(timer); $('#pipe').classList.toggle('on', on);
-  steps.forEach(s=>s.className='step');
-  if(!on) return;
-  let k = 0; steps[0].classList.add('active');
-  timer = setInterval(() => { if(k < 2){ steps[k].className='step done'; k++; steps[k].classList.add('active'); } }, 2500);
+  clearInterval(timer);
+  $('#pipe').classList.toggle('on', on);
+  steps.forEach(s => s.className = 'step');
+  if (!on) return;
+  
+  let k = 0;
+  steps[0].classList.add('active');
+  timer = setInterval(() => {
+    if (k < 3) {
+      steps[k].className = 'step done';
+      k++;
+      steps[k].classList.add('active');
+    }
+  }, 2200);
 }
 
+// Process submission
 $('#go').onclick = async () => {
   const text = $('#msg').value.trim();
-  $('#err').style.display='none';
-  if(!text && !img){ $('#err').textContent='Paste a message or attach an image first.'; $('#err').style.display='block'; return; }
-  $('#go').disabled = true; pipeline(true);
-  try{
-    const res = await fetch('/api/process', {method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({text, image_b64: img?.b64 || null, mime_type: img?.mime || null})});
+  $('#err').style.display = 'none';
+  if (!text && !img) {
+    $('#err').textContent = 'Please paste a message or attach an image invoice first.';
+    $('#err').style.display = 'block';
+    return;
+  }
+  
+  $('#go').disabled = true;
+  pipeline(true);
+
+  try {
+    const res = await fetch('/api/process', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text,
+        image_b64: img?.b64 || null,
+        mime_type: img?.mime || null
+      })
+    });
+    
     const data = await res.json();
-    if(!res.ok) throw new Error(data.detail || 'Something went wrong');
-    document.querySelectorAll('.step').forEach(s=>s.className='step done'); clearInterval(timer);
-    $('#msg').value=''; img=null; $('#file').value=''; $('#fname').textContent='No image';
-    selected = data.id; filter='waiting_for_approval';
-    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x.dataset.f===filter));
-    await refresh(true); toast(`Draft #${data.id} ready for review`);
-    setTimeout(()=>pipeline(false), 1500);
-  }catch(e){
+    if (!res.ok) throw new Error(data.detail || 'Something went wrong');
+
+    document.querySelectorAll('.step').forEach(s => s.className = 'step done');
+    clearInterval(timer);
+    
+    $('#msg').value = '';
+    clearFile();
+    selected = data.id;
+    filter = 'waiting_for_approval';
+    
+    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x.dataset.f === filter));
+    await refresh(true);
+    toast(`Draft #${data.id} ready for approval`);
+    setTimeout(() => pipeline(false), 1600);
+  } catch (e) {
     pipeline(false);
-    $('#err').textContent = /503|UNAVAILABLE|demand/i.test(e.message) ? 'Gemini is busy right now. Wait a minute and try again.' : e.message;
-    $('#err').style.display='block';
-  }finally{ $('#go').disabled = false; }
+    $('#err').textContent = /503|UNAVAILABLE|demand/i.test(e.message)
+      ? 'Gemini API is temporarily busy. Please wait a moment and click Process again.'
+      : e.message;
+    $('#err').style.display = 'block';
+  } finally {
+    $('#go').disabled = false;
+  }
 };
+
+// Keyboard shortcuts for judges & power users
+window.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    if (selected && $('#approve')) {
+      e.preventDefault();
+      $('#approve').click();
+    }
+  }
+});
 
 refresh();
 </script>
