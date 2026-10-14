@@ -148,6 +148,12 @@ def run_case(url: str, case: dict) -> dict:
         "triage_save_drift": bool(triage_category) and triage_category != got_category,
         "passed": all(checks.values()),
         "item_id": item.get("id"),
+        # Billed tokens for this message, reported by the API across all three
+        # agents. Present only on builds that instrument usage.
+        "tokens_in": item.get("tokens_in"),
+        "tokens_out": item.get("tokens_out"),
+        "model_calls": item.get("model_calls"),
+        "model": item.get("model"),
         "draft_reply": draft,
         "intake": intake,
         "triage": triage,

@@ -78,6 +78,7 @@ async def process(body: ProcessIn):
         raise HTTPException(400, "Add a message or attach an image.")
 
     highest_before = max((i["id"] for i in store.load_items()), default=0)
+    usage_before = MODEL.usage
     session = await runner.session_service.create_session(app_name=APP_NAME, user_id=USER)
 
     parts = []
@@ -122,6 +123,11 @@ async def process(body: ProcessIn):
         # Which rung of the ladder actually answered. The dashboard shows this
         # instead of claiming the primary model every time.
         "model": MODEL.last_model,
+        # Tokens this message actually cost, as counted by the API across all
+        # three agents. Lets the cost estimate be measured, not guessed.
+        "tokens_in": MODEL.usage["input"] - usage_before["input"],
+        "tokens_out": MODEL.usage["output"] - usage_before["output"],
+        "model_calls": MODEL.usage["calls"] - usage_before["calls"],
     }
     return store.update_item(new["id"], extras) or {**new, **extras}
 

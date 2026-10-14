@@ -1,0 +1,41 @@
+name: checks
+
+# The fast checks, on every push and pull request. Seconds, no API key, no cost.
+#
+# The live eval suite (tests/run_eval.py) is deliberately NOT here: it needs a
+# deployed service and a Gemini key, takes about fifteen minutes and bills real
+# tokens for all 17 cases. Running it per push would be slow and would spend
+# money on every typo fix. It belongs before a submission, and after any prompt,
+# model or storage change.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Dependency pins resolve
+        # google-adk and google-api-core disagree about opentelemetry; this
+        # catches a bump to either one that makes the set uninstallable.
+        run: pip check
+
+      - name: Syntax, secrets and offline test suite
+        run: python tests/checks.py
+
+      - name: Agents still build
+        run: python -c "from ecs_desk.agent import root_agent; print([a.name for a in root_agent.sub_agents])"

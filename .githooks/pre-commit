@@ -1,0 +1,20 @@
+#!/bin/sh
+# ECS Desk pre-commit check. Enable it once per clone with:
+#     git config core.hooksPath .githooks
+#
+# Runs in a few seconds: syntax, the offline model-ladder suite, and a scan for
+# secrets and files that must never be committed. The live eval suite is NOT run
+# here - it needs a deployed service, takes about fifteen minutes and costs real
+# money. Run `python tests/run_eval.py` before a submission instead.
+#
+# To commit anyway in an emergency: git commit --no-verify
+
+if [ -x ".venv/Scripts/python.exe" ]; then
+  PY=".venv/Scripts/python.exe"          # Windows
+elif [ -x ".venv/bin/python" ]; then
+  PY=".venv/bin/python"                  # macOS / Linux
+else
+  PY="python"
+fi
+
+"$PY" tests/checks.py --staged

@@ -1,0 +1,100 @@
+name: deploy to Cloud Run
+
+# MANUAL ONLY, on purpose.
+#
+# This deploys the service the judges click. Between now and the submission
+# deadline an automatic deploy on every push would mean one bad commit takes
+# the demo down while nobody is watching. Press the button when you mean it.
+#
+# Turn it into an automatic deploy after judging by uncommenting the `push`
+# trigger below.
+#
+# One-time setup (no service-account key file needed):
+#
+#   PROJECT=deskpilot-507116
+#   gcloud iam workload-identity-pools create github --location=global --project=$PROJECT
+#   gcloud iam workload-identity-pools providers create-oidc github \
+#     --location=global --workload-identity-pool=github --project=$PROJECT \
+#     --issuer-uri=https://token.actions.githubusercontent.com \
+#     --attribute-mapping=google.subject=assertion.sub,attribute.repository=assertion.repository \
+#     --attribute-condition="assertion.repository=='edmundzen/ecs-desk'"
+#   gcloud iam service-accounts create github-deployer --project=$PROJECT
+#   # grant run.admin, cloudbuild.builds.editor, iam.serviceAccountUser,
+#   # artifactregistry.writer and storage.admin to that service account, then
+#   # bind it to the pool with roles/iam.workloadIdentityUser.
+#
+# Then add two repository variables (Settings -> Secrets and variables ->
+# Actions -> Variables):
+#   GCP_WORKLOAD_IDENTITY_PROVIDER
+#   GCP_SERVICE_ACCOUNT
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy" to confirm'
+        required: true
+  # push:
+  #   branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    if: github.event.inputs.confirm == 'deploy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PROJECT_ID: deskpilot-507116
+      REGION: asia-southeast1
+      SERVICE: ecs-desk
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Fast checks must pass before anything ships
+        run: |
+          pip check
+          python tests/checks.py
+
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy
+        run: |
+          gcloud run deploy "$SERVICE" \
+            --source . \
+            --project="$PROJECT_ID" \
+            --region="$REGION" \
+            --allow-unauthenticated \
+            --set-env-vars=GOOGLE_CLOUD_PROJECT="$PROJECT_ID",GOOGLE_GENAI_USE_VERTEXAI=FALSE \
+            --set-secrets=GOOGLE_API_KEY=gemini-api-key:latest \
+            --labels=dev-tutorial=cloud-run-ai-challenge \
+            --memory=1Gi --timeout=300 --max-instances=3 \
+            --quiet
+
+      - name: Smoke test the new revision
+        run: |
+          URL=$(gcloud run services describe "$SERVICE" --project="$PROJECT_ID" \
+                 --region="$REGION" --format='value(status.url)')
+          echo "deployed: $URL"
+          curl -fsS "$URL/api/health"
+          echo
+          # The challenge requires this label; fail loudly if it ever goes missing.
+          gcloud run services describe "$SERVICE" --project="$PROJECT_ID" \
+            --region="$REGION" --format='value(metadata.labels)' \
+            | grep -q 'dev-tutorial=cloud-run-ai-challenge'
+          echo "campaign label present"

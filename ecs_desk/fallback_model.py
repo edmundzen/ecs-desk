@@ -36,6 +36,7 @@ class FallbackGemini(BaseLlm):
     ladder: list[str] = list(MODEL_LADDER)
     _delegates: dict = PrivateAttr(default_factory=dict)
     _last_model: str | None = PrivateAttr(default=None)
+    _usage: dict = PrivateAttr(default_factory=lambda: {"input": 0, "output": 0, "calls": 0})
 
     def __init__(self, **data):
         data.setdefault("ladder", list(MODEL_LADDER))
@@ -64,6 +65,15 @@ class FallbackGemini(BaseLlm):
         """
         return self._last_model
 
+    @property
+    def usage(self) -> dict:
+        """Tokens billed so far, counted by the API rather than estimated.
+
+        Cumulative since process start; a caller takes a before/after
+        difference around one run. Same single-owner caveat as `last_model`.
+        """
+        return dict(self._usage)
+
     async def generate_content_async(
         self, llm_request: LlmRequest, stream: bool = False
     ) -> AsyncGenerator[LlmResponse, None]:
@@ -72,13 +82,24 @@ class FallbackGemini(BaseLlm):
         for model_name in self.ladder:
             llm_request.model = model_name
             started = False
+            billed = None
             try:
                 async for response in self._delegate(model_name).generate_content_async(
                     llm_request, stream=stream
                 ):
                     started = True
                     self._last_model = model_name
+                    # Streaming repeats the figures on later chunks, so keep
+                    # the latest and add it once the call finishes.
+                    if response.usage_metadata is not None:
+                        billed = response.usage_metadata
                     yield response
+                if billed is not None:
+                    # Thinking tokens are billed at the output rate.
+                    self._usage["input"] += billed.prompt_token_count or 0
+                    self._usage["output"] += ((billed.candidates_token_count or 0)
+                                              + (billed.thoughts_token_count or 0))
+                    self._usage["calls"] += 1
                 return
             except APIError as exc:
                 # Part of an answer is already out. Restarting would duplicate
