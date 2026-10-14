@@ -1,3 +1,7 @@
+"""
+ECS Desk - Day 3: Intake -> Triage -> Draft (+ save for human approval)
+Nothing is ever sent automatically. Every draft waits in outbox.json for a human.
+"""
 import json
 from datetime import datetime
 from pathlib import Path
@@ -14,6 +18,7 @@ MODEL = Gemini(
 OUTBOX = Path(__file__).parent / "outbox.json"
 
 
+# ---------- TOOL: save a draft as "waiting for approval" ----------
 def save_for_approval(
     category: str, urgency: str, customer: str, subject: str, draft_reply: str
 ) -> dict:
@@ -45,6 +50,7 @@ def save_for_approval(
     return {"id": item["id"], "status": item["status"]}
 
 
+# ---------- 1. INTAKE ----------
 intake_agent = LlmAgent(
     name="intake_agent",
     model=MODEL,
@@ -57,6 +63,7 @@ Extract FACTS ONLY. Do not reply to the customer. Do not give advice.
 
 Answer in exactly this format:
 SOURCE: email | invoice | chat message | other
+LANGUAGE: <language the sender wrote in, e.g. English, Chinese, Malay, Tamil, Singlish>
 FROM: <who SENT or ISSUED it - not who it is addressed to>
 TO: <who it is addressed to, or "unknown">
 COMPANY: <the sender's company, or "unknown">
@@ -73,6 +80,7 @@ Rules:
     output_key="intake",
 )
 
+# ---------- 2. TRIAGE ----------
 triage_agent = LlmAgent(
     name="triage_agent",
     model=MODEL,
@@ -100,6 +108,7 @@ Do not write the reply itself. A human reviews everything.
     output_key="triage",
 )
 
+# ---------- 3. DRAFT + SAVE FOR APPROVAL ----------
 draft_agent = LlmAgent(
     name="draft_agent",
     model=MODEL,
@@ -124,7 +133,13 @@ Write ONE draft based on the category:
   supplier, invoice number, total, due date, and "please check and approve payment".
 - other: a short, polite reply asking what they need help with.
 
-Style: short sentences, friendly, plain English, sign off as "[Your name]".
+Language: reply in the SAME language the customer used (see LANGUAGE in the facts).
+- Chinese -> reply in Simplified Chinese. Malay -> Malay. Tamil -> Tamil.
+- Singlish or mixed -> warm, plain standard English (never mock or copy Singlish).
+- Internal invoice notes for the owner are always in English.
+Put the subject line in English so the owner can scan the queue.
+
+Style: short sentences, friendly, plain language, sign off as "[Your name]".
 
 Then call the save_for_approval tool with category, urgency, customer, subject and the
 draft text. After the tool returns, reply with:
@@ -135,6 +150,7 @@ followed by the draft so the user can read it.
     output_key="draft",
 )
 
+# ---------- PIPELINE ----------
 root_agent = SequentialAgent(
     name="ecs_desk",
     description="ECS Desk: intake, triage and drafting for small-business admin. Human approves.",
