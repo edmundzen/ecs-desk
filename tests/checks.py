@@ -35,9 +35,20 @@ FORBIDDEN_PATHS = [
 ]
 
 
+def run(*args) -> str:
+    """Git output as text.
+
+    Always decode as UTF-8, never the platform default: on Windows that is
+    cp1252, which dies on the Tamil and Chinese in the test fixtures and takes
+    the whole hook down with it.
+    """
+    out = subprocess.run(["git", *args], cwd=ROOT, capture_output=True,
+                         encoding="utf-8", errors="replace")
+    return out.stdout or "" if out.returncode == 0 else ""
+
+
 def git(*args) -> list:
-    out = subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
-    return [l for l in out.stdout.splitlines() if l.strip()]
+    return [l for l in run(*args).splitlines() if l.strip()]
 
 
 def files(staged: bool) -> list:
@@ -49,13 +60,10 @@ def files(staged: bool) -> list:
 def read(path: str, staged: bool) -> str:
     """Staged content, not the working copy - they can differ."""
     if staged:
-        out = subprocess.run(["git", "show", f":{path}"], cwd=ROOT,
-                             capture_output=True, text=True)
-        return out.stdout if out.returncode == 0 else ""
-    p = ROOT / path
+        return run("show", f":{path}")
     try:
-        return p.read_text(encoding="utf-8", errors="replace")
-    except (OSError, UnicodeDecodeError):
+        return (ROOT / path).read_text(encoding="utf-8", errors="replace")
+    except OSError:
         return ""
 
 
